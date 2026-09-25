@@ -6,6 +6,8 @@ internal static class RetryConstants
 
     public const string OnRetryEvent = "OnRetry";
 
+    public const string BudgetExhaustedEvent = "RetryBudgetExhausted";
+
     public const DelayBackoffType DefaultBackoffType = DelayBackoffType.Constant;
 
     public const int DefaultRetryCount = 3;

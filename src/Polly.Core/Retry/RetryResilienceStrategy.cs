@@ -21,6 +21,7 @@ internal sealed class RetryResilienceStrategy<T> : ResilienceStrategy<T>
         OnRetry = options.OnRetry;
         DelayGenerator = options.DelayGenerator;
         UseJitter = options.UseJitter;
+        MaxRetryDuration = options.MaxRetryDuration;
 
         _timeProvider = timeProvider;
         _telemetry = telemetry;
@@ -41,6 +42,8 @@ internal sealed class RetryResilienceStrategy<T> : ResilienceStrategy<T>
 
     public bool UseJitter { get; }
 
+    public TimeSpan? MaxRetryDuration { get; }
+
     public Func<OnRetryArguments<T>, ValueTask>? OnRetry { get; }
 
     protected internal override async ValueTask<Outcome<T>> ExecuteCore<TState>(Func<ResilienceContext, TState, ValueTask<Outcome<T>>> callback, ResilienceContext context, TState state)
@@ -48,6 +51,7 @@ internal sealed class RetryResilienceStrategy<T> : ResilienceStrategy<T>
         double retryState = 0;
 
         int attempt = 0;
+        var executionStartTimestamp = _timeProvider.GetTimestamp();
 
         while (true)
         {
@@ -106,9 +110,13 @@ internal sealed class RetryResilienceStrategy<T> : ResilienceStrategy<T>
                 await OnRetry(onRetryArgs).ConfigureAwait(context.ContinueOnCapturedContext);
             }
 
-            if (outcome.TryGetResult(out var resultValue))
+            // If the remaining budget cannot accommodate the whole delay, stop retrying and return the last outcome.
+            // The delay is never truncated and the budget never aborts the user callback.
+            if (MaxRetryDuration is TimeSpan budget &&
+                delay > budget - _timeProvider.GetElapsedTime(executionStartTimestamp))
             {
-                await DisposeHelper.TryDisposeSafeAsync(resultValue, context.IsSynchronous).ConfigureAwait(context.ContinueOnCapturedContext);
+                ReportBudgetExhausted(onRetryArgs);
+                return outcome;
             }
 
             try
@@ -124,8 +132,21 @@ internal sealed class RetryResilienceStrategy<T> : ResilienceStrategy<T>
             }
             catch (OperationCanceledException e)
             {
+                await TryDisposeOutcomeAsync(outcome, context).ConfigureAwait(context.ContinueOnCapturedContext);
                 return Outcome.FromException<T>(e);
             }
+
+            // After the delay has been waited, the budget might be exhausted. Do not start the next attempt
+            // and return the last outcome to the caller without disposing it.
+            if (MaxRetryDuration is TimeSpan postDelayBudget &&
+                _timeProvider.GetElapsedTime(executionStartTimestamp) >= postDelayBudget)
+            {
+                ReportBudgetExhausted(onRetryArgs);
+                return outcome;
+            }
+
+            // The next attempt is really going to be executed, so the previous result can be safely discarded.
+            await TryDisposeOutcomeAsync(outcome, context).ConfigureAwait(context.ContinueOnCapturedContext);
 
             if (incrementAttempts)
             {
@@ -133,6 +154,17 @@ internal sealed class RetryResilienceStrategy<T> : ResilienceStrategy<T>
             }
         }
     }
+
+    private static async ValueTask TryDisposeOutcomeAsync(Outcome<T> outcome, ResilienceContext context)
+    {
+        if (outcome.TryGetResult(out var resultValue))
+        {
+            await DisposeHelper.TryDisposeSafeAsync(resultValue, context.IsSynchronous).ConfigureAwait(context.ContinueOnCapturedContext);
+        }
+    }
+
+    private void ReportBudgetExhausted(OnRetryArguments<T> args) =>
+        _telemetry.Report<OnRetryArguments<T>, T>(new(ResilienceEventSeverity.Warning, RetryConstants.BudgetExhaustedEvent), args);
 
     internal bool IsLastAttempt(int attempt, out bool incrementAttempts)
     {

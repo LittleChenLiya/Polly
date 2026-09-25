@@ -12,5 +12,6 @@ public class RetryConstantsTests
         RetryConstants.DefaultRetryCount.ShouldBe(3);
         RetryConstants.MaxRetryCount.ShouldBe(int.MaxValue);
         RetryConstants.OnRetryEvent.ShouldBe("OnRetry");
+        RetryConstants.BudgetExhaustedEvent.ShouldBe("RetryBudgetExhausted");
     }
 }

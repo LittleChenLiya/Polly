@@ -554,6 +554,258 @@ public class RetryResilienceStrategyTests
         delays[1].ShouldBe(TimeSpan.FromMilliseconds(2));
     }
 
+    [Fact]
+    public async Task MaxRetryDuration_InsufficientBudgetForNextDelay_StopsBeforeSecondAttempt()
+    {
+        // Deterministic demo (finishes in a few milliseconds thanks to the fake clock, well under 90 seconds):
+        // budget is 100ms, the original call takes 40ms, the strategy callbacks take 20ms and the planned
+        // delay is 50ms. The remaining 40ms cannot accommodate the whole 50ms delay, so the second attempt
+        // never starts and the last result is returned.
+        _options.MaxRetryDuration = TimeSpan.FromMilliseconds(100);
+        _options.Delay = TimeSpan.FromMilliseconds(50);
+        _options.ShouldHandle = _ => PredicateResult.True();
+        _options.MaxRetryAttempts = 10;
+        _options.OnRetry = _ =>
+        {
+            _timeProvider.Advance(TimeSpan.FromMilliseconds(20));
+            return default;
+        };
+
+        var sut = CreateSut();
+        var executions = 0;
+
+        var result = await sut.ExecuteAsync(
+            _ =>
+            {
+                executions++;
+                _timeProvider.Advance(TimeSpan.FromMilliseconds(40));
+                return new ValueTask<int>(0);
+            },
+            TestCancellation.Token);
+
+        executions.ShouldBe(1);
+        result.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task MaxRetryDuration_RemainingBudgetEqualsDelay_WaitsButDoesNotStartNextAttempt()
+    {
+        // Budget is 100ms. After the original call (40ms) and the callbacks (10ms), the remaining budget (50ms)
+        // exactly equals the planned delay (50ms), so the wait is allowed. When the strategy wakes up the budget
+        // is exhausted, so the next attempt is not started.
+        _options.MaxRetryDuration = TimeSpan.FromMilliseconds(100);
+        _options.Delay = TimeSpan.FromMilliseconds(50);
+        _options.ShouldHandle = _ => PredicateResult.True();
+        _options.MaxRetryAttempts = 10;
+        _options.OnRetry = _ =>
+        {
+            _timeProvider.Advance(TimeSpan.FromMilliseconds(10));
+            return default;
+        };
+
+        var sut = CreateSut();
+        var executions = 0;
+
+        var executing = sut.ExecuteAsync(
+            _ =>
+            {
+                executions++;
+                _timeProvider.Advance(TimeSpan.FromMilliseconds(40));
+                return new ValueTask<int>(0);
+            },
+            TestCancellation.Token).AsTask();
+
+        // the strategy is waiting for the full, non-truncated 50ms delay
+        executing.IsCompleted.ShouldBeFalse();
+        _timeProvider.Advance(TimeSpan.FromMilliseconds(50));
+
+        var result = await executing;
+
+        executions.ShouldBe(1);
+        result.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task MaxRetryDuration_AllStagesContributeToElapsedTime()
+    {
+        // Budget is 100ms. Each stage consumes time: original call 30ms, ShouldHandle 10ms,
+        // DelayGenerator 10ms and OnRetry 10ms (60ms in total). The remaining 40ms cannot
+        // accommodate the planned 50ms delay, so the second attempt never starts.
+        _options.MaxRetryDuration = TimeSpan.FromMilliseconds(100);
+        _options.Delay = TimeSpan.FromMilliseconds(50);
+        _options.MaxRetryAttempts = 10;
+        _options.ShouldHandle = _ =>
+        {
+            _timeProvider.Advance(TimeSpan.FromMilliseconds(10));
+            return PredicateResult.True();
+        };
+        _options.DelayGenerator = _ =>
+        {
+            _timeProvider.Advance(TimeSpan.FromMilliseconds(10));
+            return new ValueTask<TimeSpan?>((TimeSpan?)null);
+        };
+        _options.OnRetry = _ =>
+        {
+            _timeProvider.Advance(TimeSpan.FromMilliseconds(10));
+            return default;
+        };
+
+        var sut = CreateSut();
+        var executions = 0;
+
+        await sut.ExecuteAsync(
+            _ =>
+            {
+                executions++;
+                _timeProvider.Advance(TimeSpan.FromMilliseconds(30));
+                return new ValueTask<int>(0);
+            },
+            TestCancellation.Token);
+
+        executions.ShouldBe(1);
+    }
+
+    [Fact]
+    public void MaxRetryDuration_BudgetExhausted_EnsureTelemetryReported()
+    {
+        _options.MaxRetryDuration = TimeSpan.FromMilliseconds(100);
+        _options.Delay = TimeSpan.FromMilliseconds(50);
+        _options.ShouldHandle = _ => PredicateResult.True();
+        _options.OnRetry = _ =>
+        {
+            _timeProvider.Advance(TimeSpan.FromMilliseconds(60));
+            return default;
+        };
+
+        var sut = CreateSut();
+
+        sut.Execute(() => 0);
+
+        var args = _args.Single(a => a.Event.EventName == RetryConstants.BudgetExhaustedEvent);
+        args.Event.Severity.ShouldBe(ResilienceEventSeverity.Warning);
+        args.Arguments.ShouldBeOfType<OnRetryArguments<object>>().RetryDelay.ShouldBe(TimeSpan.FromMilliseconds(50));
+    }
+
+    [Fact]
+    public void MaxRetryDuration_AttemptsExhaustedFirst_EnsureNoBudgetTelemetry()
+    {
+        // MaxRetryAttempts takes precedence over the budget: when the attempts are exhausted
+        // the last outcome is returned without reporting a budget-related event.
+        _options.MaxRetryDuration = TimeSpan.FromHours(1);
+        _options.MaxRetryAttempts = 1;
+        _options.ShouldHandle = _ => PredicateResult.True();
+        SetupNoDelay();
+
+        var sut = CreateSut();
+        var executions = 0;
+
+        sut.Execute(() =>
+        {
+            executions++;
+            return 0;
+        });
+
+        executions.ShouldBe(2);
+        _args.ShouldNotContain(a => a.Event.EventName == RetryConstants.BudgetExhaustedEvent);
+    }
+
+    [Fact]
+    public void MaxRetryDuration_BudgetExhausted_EnsureLastResultNotDisposed()
+    {
+        _options.MaxRetryDuration = TimeSpan.FromMilliseconds(100);
+        _options.Delay = TimeSpan.FromMilliseconds(50);
+        _options.ShouldHandle = _ => PredicateResult.True();
+        _options.OnRetry = _ =>
+        {
+            _timeProvider.Advance(TimeSpan.FromMilliseconds(60));
+            return default;
+        };
+
+        var sut = CreateSut();
+        var results = new List<DisposableResult>();
+
+        var result = sut.Execute(() =>
+        {
+            var r = new DisposableResult();
+            results.Add(r);
+            _timeProvider.Advance(TimeSpan.FromMilliseconds(40));
+            return r;
+        });
+
+        results.Count.ShouldBe(1);
+        result.IsDisposed.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task MaxRetryDuration_IntermediateResultsDisposed_LastResultReturnedIntact()
+    {
+        // Budget is 150ms. Each attempt consumes 40ms for the call and 10ms for OnRetry, the delay is 50ms.
+        // First attempt: 50ms elapsed, the remaining 100ms fits the 50ms delay. After the wait 100ms < 150ms,
+        // so the second attempt starts and the first result is disposed.
+        // Second attempt: 150ms elapsed, no budget left for the next 50ms delay. The last result is returned undisposed.
+        _options.MaxRetryDuration = TimeSpan.FromMilliseconds(150);
+        _options.Delay = TimeSpan.FromMilliseconds(50);
+        _options.ShouldHandle = _ => PredicateResult.True();
+        _options.MaxRetryAttempts = 10;
+        _options.OnRetry = _ =>
+        {
+            _timeProvider.Advance(TimeSpan.FromMilliseconds(10));
+            return default;
+        };
+
+        var sut = CreateSut();
+        var results = new List<DisposableResult>();
+
+        var executing = sut.ExecuteAsync(
+            _ =>
+            {
+                var r = new DisposableResult();
+                results.Add(r);
+                _timeProvider.Advance(TimeSpan.FromMilliseconds(40));
+                return new ValueTask<DisposableResult>(r);
+            },
+            TestCancellation.Token).AsTask();
+
+        while (!executing.IsCompleted)
+        {
+            _timeProvider.Advance(TimeSpan.FromMilliseconds(50));
+        }
+
+        var result = await executing;
+
+        results.Count.ShouldBe(2);
+        results[0].IsDisposed.ShouldBeTrue();
+        result.ShouldBeSameAs(results[1]);
+        result.IsDisposed.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task MaxRetryDuration_CanceledDuringDelay_EnsureCancellationRespected()
+    {
+        _options.MaxRetryDuration = TimeSpan.FromMinutes(10);
+        _options.ShouldHandle = _ => PredicateResult.True();
+
+        using var cancellation = _timeProvider.CreateCancellationTokenSource(_options.Delay);
+
+        var sut = CreateSut();
+        var executions = 0;
+
+        var resultTask = sut.ExecuteOutcomeAsync(
+            (_, _) =>
+            {
+                executions++;
+                return Outcome.FromResultAsValueTask(new object());
+            },
+            ResilienceContextPool.Shared.Get(cancellation.Token),
+            default(object));
+
+        _timeProvider.Advance(_options.Delay);
+        var result = await resultTask;
+
+        result.Exception.ShouldBeAssignableTo<OperationCanceledException>();
+        executions.ShouldBe(1);
+    }
+
     private void SetupNoDelay() => _options.DelayGenerator = _ => new ValueTask<TimeSpan?>(TimeSpan.Zero);
 
     private async ValueTask<int> ExecuteAndAdvance(ResiliencePipeline<object> sut)

@@ -90,6 +90,39 @@ public class RetryStrategyOptions<TResult> : ResilienceStrategyOptions
     public TimeSpan? MaxDelay { get; set; }
 
     /// <summary>
+    /// Gets or sets the maximum total duration of the whole retry execution.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The elapsed time is measured with the <see cref="TimeProvider"/> configured on the pipeline builder and includes
+    /// the original call, the time spent in the <see cref="ShouldHandle"/>, <see cref="DelayGenerator"/> and <see cref="OnRetry"/>
+    /// callbacks, and the delays waited between attempts. The original call is always allowed to execute.
+    /// </para>
+    /// <para>
+    /// Before waiting for the next retry delay, the strategy checks whether the remaining budget can accommodate the whole delay.
+    /// If not, the retry loop stops and the last outcome is returned to the caller. The delay is never truncated and this budget
+    /// does not act as a timeout that aborts the user callback. After a delay has been waited, the budget is checked once more and
+    /// if it is exhausted the next attempt is not started and the last outcome is returned.
+    /// </para>
+    /// <para>
+    /// Precedence with other settings:
+    /// <list type="bullet">
+    /// <item><see cref="MaxRetryAttempts"/> is evaluated first. When the maximum number of attempts is reached, the last outcome is returned regardless of the remaining budget.</item>
+    /// <item><see cref="MaxDelay"/> caps the individual delay. The budget is then compared against the final (possibly capped or generated) delay.</item>
+    /// <item>Cancellation is always honored while waiting for the next attempt. If the cancellation token is signaled during the delay, an <see cref="OperationCanceledException"/> outcome is returned instead of the last outcome.</item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// When this property is not set (the default), no total duration limit is applied and the strategy behaves as before.
+    /// </para>
+    /// </remarks>
+    /// <value>
+    /// The default value is <see langword="null"/>.
+    /// </value>
+    [Range(typeof(TimeSpan), "00:00:00", "10675199.02:48:05.4775807")]
+    public TimeSpan? MaxRetryDuration { get; set; }
+
+    /// <summary>
     /// Gets or sets a predicate that determines whether the retry should be executed for a given outcome.
     /// </summary>
     /// <value>

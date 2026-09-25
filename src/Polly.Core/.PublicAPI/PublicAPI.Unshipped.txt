@@ -1,1 +1,3 @@
 ﻿#nullable enable
+Polly.Retry.RetryStrategyOptions<TResult>.MaxRetryDuration.get -> System.TimeSpan?
+Polly.Retry.RetryStrategyOptions<TResult>.MaxRetryDuration.set -> void

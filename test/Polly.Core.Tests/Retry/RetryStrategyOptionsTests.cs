@@ -20,6 +20,7 @@ public class RetryStrategyOptionsTests
         options.MaxRetryAttempts.ShouldBe(3);
         options.BackoffType.ShouldBe(DelayBackoffType.Constant);
         options.Delay.ShouldBe(TimeSpan.FromSeconds(2));
+        options.MaxRetryDuration.ShouldBeNull();
         options.Name.ShouldBe("Retry");
         options.Randomizer.ShouldNotBeNull();
     }
@@ -45,7 +46,8 @@ public class RetryStrategyOptionsTests
             OnRetry = null!,
             MaxRetryAttempts = -3,
             Delay = TimeSpan.MinValue,
-            MaxDelay = TimeSpan.FromSeconds(-10)
+            MaxDelay = TimeSpan.FromSeconds(-10),
+            MaxRetryDuration = TimeSpan.FromSeconds(-10)
         };
 
         var exception = Should.Throw<ValidationException>(() => ValidationHelper.ValidateObject(new(options, "Invalid Options")));
@@ -55,6 +57,7 @@ public class RetryStrategyOptionsTests
             The field MaxRetryAttempts must be between 1 and 2147483647.
             The field Delay must be between 00:00:00 and 1.00:00:00.
             The field MaxDelay must be between 00:00:00 and 1.00:00:00.
+            The field MaxRetryDuration must be between 00:00:00 and 10675199.02:48:05.4775807.
             The ShouldHandle field is required.
             """,
             StringCompareShould.IgnoreLineEndings);

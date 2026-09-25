@@ -110,6 +110,32 @@ new ResiliencePipelineBuilder<HttpResponseMessage>().AddRetry(optionsExtractDela
 | `UseJitter`        | False                                                   | If set to `true`, a jitter (random value) is added to retry delays. See the next section for more details.                                                           |
 | `DelayGenerator`   | `null`                                                  | This optional delegate allows you to **dynamically** calculate the retry delay by utilizing information that is only available at runtime (like the attempt number). |
 | `OnRetry`          | `null`                                                  | If provided then it will be invoked before the strategy delays the next attempt.                                                                                     |
+| `MaxRetryDuration` | `null`                                                  | If provided then the strategy stops retrying when the total elapsed time of the whole execution leaves no room for the next delay.                                    |
+
+## Limiting the total retry duration
+
+The `MaxRetryDuration` property defines an optional total time budget for the whole retry execution. The elapsed time is measured with the `TimeProvider` configured on the pipeline builder and includes:
+
+- The original call (which is always allowed to execute).
+- The time spent in the `ShouldHandle`, `DelayGenerator` and `OnRetry` callbacks.
+- The delays waited between attempts.
+
+Before waiting for the next retry delay, the strategy checks whether the remaining budget can accommodate the **whole** delay:
+
+- If the remaining budget is smaller than the next delay, the retry loop stops and the last outcome is returned to the caller. The delay is never truncated.
+- If the remaining budget exactly equals the next delay, the wait happens. After waking up, the budget is checked once more and if it is exhausted, the next attempt is not started and the last outcome is returned.
+
+`MaxRetryDuration` is **not** a timeout: it never aborts the user callback. If you need to bound the duration of individual attempts, combine the retry strategy with the [timeout strategy](timeout.md).
+
+Precedence with other settings:
+
+- `MaxRetryAttempts` is evaluated first. When the maximum number of attempts is reached, the last outcome is returned regardless of the remaining budget.
+- `MaxDelay` caps the individual delay. The budget is then compared against the final (possibly capped or generated) delay.
+- Cancellation is always honored while waiting for the next attempt. If the cancellation token is signaled during the delay, an `OperationCanceledException` outcome is returned instead of the last outcome.
+
+When `MaxRetryDuration` is not set (the default), no total duration limit is applied and the strategy behaves as before.
+
+When the retry loop stops because the budget is exhausted, a `RetryBudgetExhausted` telemetry event is reported and the last outcome is returned to the caller without being disposed.
 
 ## Telemetry
 
@@ -119,6 +145,7 @@ The retry strategy reports the following telemetry events:
 |--------------------|-------------------------------------|-------------------------------------------------------|
 | `ExecutionAttempt` | `Information` / `Warning` / `Error` | Just before the strategy calculates the next delay    |
 | `OnRetry`          | `Warning`                           | Just before the strategy calls the `OnRetry` delegate |
+| `RetryBudgetExhausted` | `Warning`                       | When the strategy stops retrying because the `MaxRetryDuration` budget is exhausted |
 
 Here are some sample events:
 
