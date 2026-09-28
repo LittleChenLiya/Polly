@@ -1,1 +1,9 @@
 ﻿#nullable enable
+Polly.Retry.CleanupResultArguments<TResult>
+Polly.Retry.CleanupResultArguments<TResult>.AttemptNumber.get -> int
+Polly.Retry.CleanupResultArguments<TResult>.CleanupResultArguments() -> void
+Polly.Retry.CleanupResultArguments<TResult>.CleanupResultArguments(Polly.ResilienceContext! context, Polly.Outcome<TResult> outcome, int attemptNumber) -> void
+Polly.Retry.CleanupResultArguments<TResult>.Context.get -> Polly.ResilienceContext!
+Polly.Retry.CleanupResultArguments<TResult>.Outcome.get -> Polly.Outcome<TResult>
+Polly.Retry.RetryStrategyOptions<TResult>.CleanupResult.get -> System.Func<Polly.Retry.CleanupResultArguments<TResult>, System.Threading.Tasks.ValueTask>?
+Polly.Retry.RetryStrategyOptions<TResult>.CleanupResult.set -> void

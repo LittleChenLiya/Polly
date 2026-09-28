@@ -17,6 +17,8 @@ public class RetryStrategyOptionsTests
 
         options.OnRetry.ShouldBeNull();
 
+        options.CleanupResult.ShouldBeNull();
+
         options.MaxRetryAttempts.ShouldBe(3);
         options.BackoffType.ShouldBe(DelayBackoffType.Constant);
         options.Delay.ShouldBe(TimeSpan.FromSeconds(2));

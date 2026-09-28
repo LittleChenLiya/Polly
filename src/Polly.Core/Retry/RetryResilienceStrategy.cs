@@ -21,6 +21,7 @@ internal sealed class RetryResilienceStrategy<T> : ResilienceStrategy<T>
         OnRetry = options.OnRetry;
         DelayGenerator = options.DelayGenerator;
         UseJitter = options.UseJitter;
+        CleanupResult = options.CleanupResult;
 
         _timeProvider = timeProvider;
         _telemetry = telemetry;
@@ -42,6 +43,8 @@ internal sealed class RetryResilienceStrategy<T> : ResilienceStrategy<T>
     public bool UseJitter { get; }
 
     public Func<OnRetryArguments<T>, ValueTask>? OnRetry { get; }
+
+    public Func<CleanupResultArguments<T>, ValueTask>? CleanupResult { get; }
 
     protected internal override async ValueTask<Outcome<T>> ExecuteCore<TState>(Func<ResilienceContext, TState, ValueTask<Outcome<T>>> callback, ResilienceContext context, TState state)
     {
@@ -101,14 +104,44 @@ internal sealed class RetryResilienceStrategy<T> : ResilienceStrategy<T>
             var onRetryArgs = new OnRetryArguments<T>(context, outcome, attempt, delay, executionTime);
             _telemetry.Report<OnRetryArguments<T>, T>(new(ResilienceEventSeverity.Warning, RetryConstants.OnRetryEvent), onRetryArgs);
 
+            Exception? notificationException = null;
             if (OnRetry is not null)
             {
-                await OnRetry(onRetryArgs).ConfigureAwait(context.ContinueOnCapturedContext);
+                try
+                {
+                    await OnRetry(onRetryArgs).ConfigureAwait(context.ContinueOnCapturedContext);
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception e)
+#pragma warning restore CA1031 // Do not catch general exception types
+                {
+                    notificationException = e;
+                }
             }
 
-            if (outcome.TryGetResult(out var resultValue))
+            Exception? cleanupException = null;
+            if (CleanupResult is not null)
+            {
+                var cleanupArgs = new CleanupResultArguments<T>(context, outcome, attempt);
+                try
+                {
+                    await CleanupResult(cleanupArgs).ConfigureAwait(context.ContinueOnCapturedContext);
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception e)
+#pragma warning restore CA1031 // Do not catch general exception types
+                {
+                    cleanupException = e;
+                }
+            }
+            else if (outcome.TryGetResult(out var resultValue))
             {
                 await DisposeHelper.TryDisposeSafeAsync(resultValue, context.IsSynchronous).ConfigureAwait(context.ContinueOnCapturedContext);
+            }
+
+            if (cleanupException is not null || notificationException is not null)
+            {
+                return Outcome.FromException<T>(CombineExceptions(cleanupException, notificationException, outcome.Exception));
             }
 
             try
@@ -120,7 +153,6 @@ internal sealed class RetryResilienceStrategy<T> : ResilienceStrategy<T>
                 {
                     await _timeProvider.DelayAsync(delay, context).ConfigureAwait(context.ContinueOnCapturedContext);
                 }
-
             }
             catch (OperationCanceledException e)
             {
@@ -144,5 +176,17 @@ internal sealed class RetryResilienceStrategy<T> : ResilienceStrategy<T>
 
         incrementAttempts = true;
         return attempt >= RetryCount;
+    }
+
+    private static Exception CombineExceptions(params Exception?[] exceptions)
+    {
+        var innerExceptions = exceptions
+            .Where(static exception => exception is not null)
+            .Cast<Exception>()
+            .ToList();
+
+        return innerExceptions.Count == 1
+            ? innerExceptions[0]
+            : new AggregateException(innerExceptions);
     }
 }

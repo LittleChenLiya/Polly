@@ -124,6 +124,32 @@ public class RetryStrategyOptions<TResult> : ResilienceStrategyOptions
     public Func<OnRetryArguments<TResult>, ValueTask>? OnRetry { get; set; }
 
     /// <summary>
+    /// Gets or sets a callback that cleans up a result produced by the user-callback once it has been decided to retry the operation.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Use this callback to explicitly release the resources held by a result that is discarded because of a retry, such as an HTTP response
+    /// body or a stream. The callback is invoked after <see cref="OnRetry"/> and before the retry delay is awaited. The result returned to the
+    /// caller is never passed to this callback.
+    /// </para>
+    /// <para>
+    /// Each discarded result is cleaned up at most once. The callback is awaited even if <see cref="OnRetry"/> throws an exception or the
+    /// execution is canceled while the retry notification is being raised. If the callback itself throws an exception, the retry operation is
+    /// stopped and the cleanup exception is reported to the caller. When the discarded outcome also represents an exception, both exceptions
+    /// are combined into an <see cref="AggregateException"/>, with the cleanup exception being the first inner exception.
+    /// </para>
+    /// <para>
+    /// When this property is <see langword="null"/>, the retry strategy performs its default best-effort disposal of discarded results that
+    /// implement <see cref="IDisposable"/> or <see cref="IAsyncDisposable"/>. When this property is assigned, it replaces the default
+    /// disposal logic entirely, so the callback is responsible for disposing the discarded result if required.
+    /// </para>
+    /// </remarks>
+    /// <value>
+    /// The default value is <see langword="null"/>.
+    /// </value>
+    public Func<CleanupResultArguments<TResult>, ValueTask>? CleanupResult { get; set; }
+
+    /// <summary>
     /// Gets or sets the randomizer that is used by the retry strategy to generate random numbers.
     /// </summary>
     /// <value>
