@@ -4,6 +4,8 @@
 
 <!-- next-release -->
 
+* Add `MaxTotalRetryDuration` to `RetryStrategyOptions` to limit the total duration of the whole retry execution
+
 ## 8.8.0
 
 * Add `EnableReloadsWithMonitor()` accepting custom `IOptionsMonitor` by [@arashzjahangiri](https://github.com/arashzjahangiri) in https://github.com/App-vNext/Polly/pull/3140

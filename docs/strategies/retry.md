@@ -92,6 +92,14 @@ var optionsIndefiniteRetry = new RetryStrategyOptions
     MaxRetryAttempts = int.MaxValue,
 };
 
+// To limit the total duration of the whole retry execution
+// (the original call, all callbacks and all delays between attempts)
+var optionsTotalDuration = new RetryStrategyOptions
+{
+    MaxRetryAttempts = int.MaxValue,
+    MaxTotalRetryDuration = TimeSpan.FromSeconds(30),
+};
+
 // Add a retry strategy with a RetryStrategyOptions{<TResult>} instance to the pipeline
 new ResiliencePipelineBuilder().AddRetry(optionsDefaults);
 new ResiliencePipelineBuilder<HttpResponseMessage>().AddRetry(optionsExtractDelay);
@@ -107,9 +115,29 @@ new ResiliencePipelineBuilder<HttpResponseMessage>().AddRetry(optionsExtractDela
 | `BackoffType`      | Constant                                                | The back-off algorithm type to generate the delay(s) between retry attempts.                                                                                         |
 | `Delay`            | 2 seconds                                               | The *base* delay between retry attempts. See the next section for more details.                                                                                      |
 | `MaxDelay`         | `null`                                                  | If provided then the strategy caps the calculated retry delay to this value.                                                                                         |
+| `MaxTotalRetryDuration` | `null`                                           | If provided then the strategy stops retrying once the total elapsed time of the whole execution leaves no room for the next delay.                                   |
 | `UseJitter`        | False                                                   | If set to `true`, a jitter (random value) is added to retry delays. See the next section for more details.                                                           |
 | `DelayGenerator`   | `null`                                                  | This optional delegate allows you to **dynamically** calculate the retry delay by utilizing information that is only available at runtime (like the attempt number). |
 | `OnRetry`          | `null`                                                  | If provided then it will be invoked before the strategy delays the next attempt.                                                                                     |
+
+## Limiting the total duration of retries
+
+The `MaxTotalRetryDuration` property sets an optional time budget for the whole retry execution. The elapsed time is measured with the `TimeProvider` configured on the pipeline builder and includes everything: the original call, the `ShouldHandle`, `DelayGenerator` and `OnRetry` callbacks, and the delays between attempts.
+
+The strategy enforces the budget only between attempts:
+
+- The first (original) call is always executed, even if the budget is already exhausted.
+- Before each delay, the strategy checks whether the remaining budget can accommodate the whole upcoming delay. If not, the retry loop stops and the last outcome is returned to the caller. The delay is never shortened.
+- If the remaining budget is exactly equal to the upcoming delay, the delay is still awaited. If the budget is exhausted after the delay completes, the next attempt is not started and the last outcome is returned.
+- The budget never aborts a callback that is already running; it is not a timeout. Use the [timeout strategy](timeout.md) to bound individual attempts.
+
+Precedence with other settings:
+
+1. `MaxRetryAttempts` is evaluated first and can end the retry loop before the budget is consulted.
+2. `MaxDelay` only caps the individual delay; the capped delay is what gets compared against the remaining budget.
+3. Cancellation requested through the cancellation token takes precedence over the budget and stops the execution immediately.
+
+When the budget is not set (the default), the retry behavior is unchanged.
 
 ## Telemetry
 
@@ -119,6 +147,7 @@ The retry strategy reports the following telemetry events:
 |--------------------|-------------------------------------|-------------------------------------------------------|
 | `ExecutionAttempt` | `Information` / `Warning` / `Error` | Just before the strategy calculates the next delay    |
 | `OnRetry`          | `Warning`                           | Just before the strategy calls the `OnRetry` delegate |
+| `MaxTotalRetryDurationExceeded` | `Warning`              | When the strategy stops retrying because the total retry duration budget is exhausted               |
 
 Here are some sample events:
 

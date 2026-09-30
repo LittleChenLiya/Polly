@@ -90,6 +90,36 @@ public class RetryStrategyOptions<TResult> : ResilienceStrategyOptions
     public TimeSpan? MaxDelay { get; set; }
 
     /// <summary>
+    /// Gets or sets the maximum total duration of the whole retry execution, including the original call,
+    /// the <see cref="ShouldHandle"/>, <see cref="DelayGenerator"/> and <see cref="OnRetry"/> callbacks and all delays between attempts.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The strategy measures the elapsed time using the time provider configured on the pipeline builder.
+    /// Before each retry delay, the strategy checks whether the remaining budget can accommodate the whole upcoming delay.
+    /// If it cannot, the retry loop stops and the last outcome is returned to the caller. The delay is never shortened and the
+    /// budget never aborts the user callback that is already running. The first (original) call is always executed.
+    /// </para>
+    /// <para>
+    /// When the remaining budget is exactly equal to the upcoming delay, the delay is still awaited. If the budget is
+    /// exhausted after the delay completes, the next attempt is not started and the last outcome is returned.
+    /// </para>
+    /// <para>
+    /// Precedence with other settings:
+    /// </para>
+    /// <list type="number">
+    /// <item><see cref="MaxRetryAttempts"/> is evaluated first and can end the retry loop before the budget is consulted.</item>
+    /// <item><see cref="MaxDelay"/> only caps the individual delay; the capped delay is what gets compared against the remaining budget.</item>
+    /// <item>Cancellation requested through the cancellation token takes precedence over the budget and stops the execution immediately.</item>
+    /// </list>
+    /// </remarks>
+    /// <value>
+    /// The default value is <see langword="null"/>, which means there is no limit on the total duration and the behavior is unchanged.
+    /// </value>
+    [Range(typeof(TimeSpan), "00:00:00", "1.00:00:00")]
+    public TimeSpan? MaxTotalRetryDuration { get; set; }
+
+    /// <summary>
     /// Gets or sets a predicate that determines whether the retry should be executed for a given outcome.
     /// </summary>
     /// <value>

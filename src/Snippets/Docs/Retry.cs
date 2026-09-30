@@ -92,6 +92,14 @@ internal static class Retry
             MaxRetryAttempts = int.MaxValue,
         };
 
+        // To limit the total duration of the whole retry execution
+        // (the original call, all callbacks and all delays between attempts)
+        var optionsTotalDuration = new RetryStrategyOptions
+        {
+            MaxRetryAttempts = int.MaxValue,
+            MaxTotalRetryDuration = TimeSpan.FromSeconds(30),
+        };
+
         // Add a retry strategy with a RetryStrategyOptions{<TResult>} instance to the pipeline
         new ResiliencePipelineBuilder().AddRetry(optionsDefaults);
         new ResiliencePipelineBuilder<HttpResponseMessage>().AddRetry(optionsExtractDelay);

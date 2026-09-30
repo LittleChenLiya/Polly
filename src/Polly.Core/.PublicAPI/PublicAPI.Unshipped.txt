@@ -1,1 +1,9 @@
-﻿#nullable enable
+#nullable enable
+Polly.Retry.RetryBudgetExceededArguments
+Polly.Retry.RetryBudgetExceededArguments.AttemptNumber.get -> int
+Polly.Retry.RetryBudgetExceededArguments.Budget.get -> System.TimeSpan
+Polly.Retry.RetryBudgetExceededArguments.ElapsedTime.get -> System.TimeSpan
+Polly.Retry.RetryBudgetExceededArguments.RetryBudgetExceededArguments() -> void
+Polly.Retry.RetryBudgetExceededArguments.RetryBudgetExceededArguments(int attemptNumber, System.TimeSpan elapsedTime, System.TimeSpan budget) -> void
+Polly.Retry.RetryStrategyOptions<TResult>.MaxTotalRetryDuration.get -> System.TimeSpan?
+Polly.Retry.RetryStrategyOptions<TResult>.MaxTotalRetryDuration.set -> void

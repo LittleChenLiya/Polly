@@ -21,6 +21,7 @@ internal sealed class RetryResilienceStrategy<T> : ResilienceStrategy<T>
         OnRetry = options.OnRetry;
         DelayGenerator = options.DelayGenerator;
         UseJitter = options.UseJitter;
+        MaxTotalRetryDuration = options.MaxTotalRetryDuration;
 
         _timeProvider = timeProvider;
         _telemetry = telemetry;
@@ -43,11 +44,14 @@ internal sealed class RetryResilienceStrategy<T> : ResilienceStrategy<T>
 
     public Func<OnRetryArguments<T>, ValueTask>? OnRetry { get; }
 
+    public TimeSpan? MaxTotalRetryDuration { get; }
+
     protected internal override async ValueTask<Outcome<T>> ExecuteCore<TState>(Func<ResilienceContext, TState, ValueTask<Outcome<T>>> callback, ResilienceContext context, TState state)
     {
         double retryState = 0;
 
         int attempt = 0;
+        var executionStartTimestamp = _timeProvider.GetTimestamp();
 
         while (true)
         {
@@ -106,14 +110,17 @@ internal sealed class RetryResilienceStrategy<T> : ResilienceStrategy<T>
                 await OnRetry(onRetryArgs).ConfigureAwait(context.ContinueOnCapturedContext);
             }
 
-            if (outcome.TryGetResult(out var resultValue))
-            {
-                await DisposeHelper.TryDisposeSafeAsync(resultValue, context.IsSynchronous).ConfigureAwait(context.ContinueOnCapturedContext);
-            }
+            TimeSpan elapsed;
 
             try
             {
                 context.CancellationToken.ThrowIfCancellationRequested();
+
+                if (IsBudgetExceeded(executionStartTimestamp, delay, allowExactFit: true, out elapsed))
+                {
+                    ReportBudgetExceeded(context, outcome, attempt, elapsed);
+                    return outcome;
+                }
 
                 // stryker disable once all : no means to test this
                 if (delay > TimeSpan.Zero)
@@ -127,10 +134,51 @@ internal sealed class RetryResilienceStrategy<T> : ResilienceStrategy<T>
                 return Outcome.FromException<T>(e);
             }
 
+            if (IsBudgetExceeded(executionStartTimestamp, TimeSpan.Zero, allowExactFit: false, out elapsed))
+            {
+                ReportBudgetExceeded(context, outcome, attempt, elapsed);
+                return outcome;
+            }
+
+            // The next attempt is really going to happen, so the previous result can be safely discarded.
+            // Until this point the last outcome must be preserved, because it is returned to the caller
+            // when the total retry duration budget is exhausted.
+            if (outcome.TryGetResult(out var resultValue))
+            {
+                await DisposeHelper.TryDisposeSafeAsync(resultValue, context.IsSynchronous).ConfigureAwait(context.ContinueOnCapturedContext);
+            }
+
             if (incrementAttempts)
             {
                 attempt++;
             }
+        }
+    }
+
+    private bool IsBudgetExceeded(long executionStartTimestamp, TimeSpan delay, bool allowExactFit, out TimeSpan elapsed)
+    {
+        if (MaxTotalRetryDuration is TimeSpan budget)
+        {
+            elapsed = _timeProvider.GetElapsedTime(executionStartTimestamp);
+
+            // When allowExactFit is true the remaining budget that exactly fits the delay is still awaited,
+            // otherwise (after the delay) any fully consumed budget stops the retry loop.
+            return allowExactFit ? elapsed + delay > budget : elapsed + delay >= budget;
+        }
+
+        elapsed = TimeSpan.Zero;
+        return false;
+    }
+
+    private void ReportBudgetExceeded(ResilienceContext context, Outcome<T> outcome, int attempt, TimeSpan elapsed)
+    {
+        if (MaxTotalRetryDuration is TimeSpan budget)
+        {
+            _telemetry.Report<RetryBudgetExceededArguments, T>(
+                new(ResilienceEventSeverity.Warning, RetryConstants.MaxTotalRetryDurationExceededEvent),
+                context,
+                outcome,
+                new RetryBudgetExceededArguments(attempt, elapsed, budget));
         }
     }
 
