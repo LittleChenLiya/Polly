@@ -14,4 +14,5 @@
   <Project Path="Intro.VisualBasic/Intro.VisualBasic.vbproj" />
   <Project Path="Intro/Intro.csproj" />
   <Project Path="Retries/Retries.csproj" />
+  <Project Path="RequestCopy/RequestCopy.csproj" />
 </Solution>

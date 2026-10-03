@@ -1,1 +1,23 @@
-﻿#nullable enable
+#nullable enable
+Polly.RequestCopyExecutor<TRequest>
+Polly.RequestCopyExecutor<TRequest>.RequestCopyExecutor(Polly.ResiliencePipeline! pipeline, Polly.RequestCopyFactory<TRequest>! factory, Polly.RequestCopyOwnership ownership = Polly.RequestCopyOwnership.AdapterOwned) -> void
+Polly.RequestCopyExecutor<TRequest>.ExecuteAsync<TResult>(TRequest request, System.Func<Polly.ResilienceContext!, TRequest, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<TResult>>! callback, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<TResult>
+Polly.RequestCopyFactory<TRequest>
+Polly.RequestCopyFactory<TRequest>.RequestCopyFactory() -> void
+abstract Polly.RequestCopyFactory<TRequest>.CreateCopy(TRequest request) -> TRequest
+virtual Polly.RequestCopyFactory<TRequest>.ReleaseCopy(TRequest copy) -> void
+Polly.RequestCopyFactoryException
+Polly.RequestCopyFactoryException.RequestCopyFactoryException() -> void
+Polly.RequestCopyFactoryException.RequestCopyFactoryException(string! message) -> void
+Polly.RequestCopyFactoryException.RequestCopyFactoryException(string! message, System.Exception! innerException) -> void
+Polly.RequestCopyOwnership
+Polly.RequestCopyOwnership.AdapterOwned = 0 -> Polly.RequestCopyOwnership
+Polly.RequestCopyOwnership.CallerOwned = 1 -> Polly.RequestCopyOwnership
+Polly.RequestCopyResiliencePipelineBuilderExtensions
+static Polly.RequestCopyResiliencePipelineBuilderExtensions.AddRequestCopy<TRequest>(this Polly.ResiliencePipelineBuilder! builder, Polly.RequestCopyResilienceStrategyOptions<TRequest>! options) -> Polly.ResiliencePipelineBuilder!
+Polly.RequestCopyResilienceStrategyOptions<TRequest>
+Polly.RequestCopyResilienceStrategyOptions<TRequest>.RequestCopyResilienceStrategyOptions() -> void
+Polly.RequestCopyResilienceStrategyOptions<TRequest>.Factory.get -> Polly.RequestCopyFactory<TRequest>?
+Polly.RequestCopyResilienceStrategyOptions<TRequest>.Factory.set -> void
+Polly.RequestCopyResilienceStrategyOptions<TRequest>.Ownership.get -> Polly.RequestCopyOwnership
+Polly.RequestCopyResilienceStrategyOptions<TRequest>.Ownership.set -> void

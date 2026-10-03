@@ -132,3 +132,9 @@ coverage.*.json
 coverage-reports/
 
 !eng/**
+
+# Local .NET SDK and NuGet packages
+.dotnet/
+.tmp/
+.nuget/
+.tools/
