@@ -12,6 +12,7 @@ Polly lets you use and combine different resilience strategies to cope with vari
 
 - [Retry](strategies/retry.md): Try again if something fails. This can be useful when the problem is temporary and might go away.
 - [Circuit Breaker](strategies/circuit-breaker.md): Stop trying if something is broken or busy. This can benefit you by avoiding wasting time and making things worse. It can also support the system to recover.
+- [Partitioned Circuit Breaker](strategies/partitioned-circuit-breaker.md): Isolate failure thresholds per caller-provided key (e.g. tenant) with a bounded, eviction-aware state budget and a `TimeProvider`-driven cooldown.
 - [Timeout](strategies/timeout.md): Give up if something takes too long. This can improve your performance by freeing up space and resources.
 - [Rate Limiter](strategies/rate-limiter.md): Limit how many requests you make or accept. This can enable you to control the load and prevent problems or penalties.
 - [Fallback](strategies/fallback.md): Do something else if something fails. This can improve your user experience and keep the program working.

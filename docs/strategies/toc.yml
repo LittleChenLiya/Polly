@@ -12,3 +12,5 @@
   href: fallback.md
 - name: Circuit breaker
   href: circuit-breaker.md
+- name: Partitioned circuit breaker
+  href: partitioned-circuit-breaker.md

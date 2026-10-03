@@ -2,6 +2,7 @@
 using Polly.CircuitBreaker;
 using Polly.Fallback;
 using Polly.Hedging;
+using Polly.Partitioning;
 using Polly.Retry;
 
 namespace Polly;
@@ -52,5 +53,16 @@ public partial class PredicateBuilder<TResult>
     {
         Guard.NotNull(builder);
         return builder.Build<CircuitBreakerPredicateArguments<TResult>>();
+    }
+
+    /// <summary>
+    /// The operator that converts <paramref name="builder"/> to <see cref="PartitionedCircuitBreakerStrategyOptions{TResult}.ShouldHandle"/> delegate.
+    /// </summary>
+    /// <param name="builder">The builder instance.</param>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static implicit operator Func<PartitionedCircuitBreakerPredicateArguments<TResult>, ValueTask<bool>>(PredicateBuilder<TResult> builder)
+    {
+        Guard.NotNull(builder);
+        return builder.Build<PartitionedCircuitBreakerPredicateArguments<TResult>>();
     }
 }

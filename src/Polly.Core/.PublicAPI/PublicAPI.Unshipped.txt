@@ -1,1 +1,55 @@
-﻿#nullable enable
+#nullable enable
+Polly.Partitioning.OnPartitionClosedArguments<TResult>
+Polly.Partitioning.OnPartitionClosedArguments<TResult>.Context.get -> Polly.ResilienceContext!
+Polly.Partitioning.OnPartitionClosedArguments<TResult>.OnPartitionClosedArguments() -> void
+Polly.Partitioning.OnPartitionClosedArguments<TResult>.OnPartitionClosedArguments(Polly.ResilienceContext! context, Polly.Outcome<TResult> outcome, string! partitionKey) -> void
+Polly.Partitioning.OnPartitionClosedArguments<TResult>.Outcome.get -> Polly.Outcome<TResult>
+Polly.Partitioning.OnPartitionClosedArguments<TResult>.PartitionKey.get -> string!
+Polly.Partitioning.OnPartitionOpenedArguments<TResult>
+Polly.Partitioning.OnPartitionOpenedArguments<TResult>.BreakDuration.get -> System.TimeSpan
+Polly.Partitioning.OnPartitionOpenedArguments<TResult>.Context.get -> Polly.ResilienceContext!
+Polly.Partitioning.OnPartitionOpenedArguments<TResult>.OnPartitionOpenedArguments() -> void
+Polly.Partitioning.OnPartitionOpenedArguments<TResult>.OnPartitionOpenedArguments(Polly.ResilienceContext! context, Polly.Outcome<TResult> outcome, string! partitionKey, System.TimeSpan breakDuration) -> void
+Polly.Partitioning.OnPartitionOpenedArguments<TResult>.Outcome.get -> Polly.Outcome<TResult>
+Polly.Partitioning.OnPartitionOpenedArguments<TResult>.PartitionKey.get -> string!
+Polly.Partitioning.PartitionedCircuitBreakerOpenException
+Polly.Partitioning.PartitionedCircuitBreakerOpenException.PartitionedCircuitBreakerOpenException() -> void
+Polly.Partitioning.PartitionedCircuitBreakerOpenException.PartitionedCircuitBreakerOpenException(string! message) -> void
+Polly.Partitioning.PartitionedCircuitBreakerOpenException.PartitionedCircuitBreakerOpenException(string! message, System.Exception! inner) -> void
+Polly.Partitioning.PartitionedCircuitBreakerOpenException.PartitionedCircuitBreakerOpenException(string! message, System.TimeSpan retryAfter) -> void
+Polly.Partitioning.PartitionedCircuitBreakerOpenException.PartitionedCircuitBreakerOpenException(string! message, System.TimeSpan retryAfter, System.Exception! inner) -> void
+Polly.Partitioning.PartitionedCircuitBreakerOpenException.PartitionedCircuitBreakerOpenException(System.TimeSpan retryAfter) -> void
+Polly.Partitioning.PartitionedCircuitBreakerOpenException.RetryAfter.get -> System.TimeSpan?
+Polly.Partitioning.PartitionedCircuitBreakerPredicateArguments<TResult>
+Polly.Partitioning.PartitionedCircuitBreakerPredicateArguments<TResult>.Context.get -> Polly.ResilienceContext!
+Polly.Partitioning.PartitionedCircuitBreakerPredicateArguments<TResult>.Outcome.get -> Polly.Outcome<TResult>
+Polly.Partitioning.PartitionedCircuitBreakerPredicateArguments<TResult>.PartitionedCircuitBreakerPredicateArguments() -> void
+Polly.Partitioning.PartitionedCircuitBreakerPredicateArguments<TResult>.PartitionedCircuitBreakerPredicateArguments(Polly.ResilienceContext! context, Polly.Outcome<TResult> outcome) -> void
+Polly.Partitioning.PartitionedCircuitBreakerRejectedException
+Polly.Partitioning.PartitionedCircuitBreakerRejectedException.MaxPartitionCount.get -> int?
+Polly.Partitioning.PartitionedCircuitBreakerRejectedException.PartitionedCircuitBreakerRejectedException() -> void
+Polly.Partitioning.PartitionedCircuitBreakerRejectedException.PartitionedCircuitBreakerRejectedException(int maxPartitionCount) -> void
+Polly.Partitioning.PartitionedCircuitBreakerRejectedException.PartitionedCircuitBreakerRejectedException(string! message) -> void
+Polly.Partitioning.PartitionedCircuitBreakerRejectedException.PartitionedCircuitBreakerRejectedException(string! message, System.Exception! inner) -> void
+Polly.PartitionedCircuitBreakerResiliencePipelineBuilderExtensions
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions.PartitionedCircuitBreakerStrategyOptions() -> void
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>.BreakDuration.get -> System.TimeSpan
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>.BreakDuration.set -> void
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>.FailureThreshold.get -> int
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>.FailureThreshold.set -> void
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>.MaxPartitionCount.get -> int
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>.MaxPartitionCount.set -> void
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>.OnClosed.get -> System.Func<Polly.Partitioning.OnPartitionClosedArguments<TResult>, System.Threading.Tasks.ValueTask>?
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>.OnClosed.set -> void
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>.OnOpened.get -> System.Func<Polly.Partitioning.OnPartitionOpenedArguments<TResult>, System.Threading.Tasks.ValueTask>?
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>.OnOpened.set -> void
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>.PartitionedCircuitBreakerStrategyOptions() -> void
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>.PartitionKeyGenerator.get -> System.Func<Polly.ResilienceContext!, string!>?
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>.PartitionKeyGenerator.set -> void
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>.ShouldHandle.get -> System.Func<Polly.Partitioning.PartitionedCircuitBreakerPredicateArguments<TResult>, System.Threading.Tasks.ValueTask<bool>>!
+Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>.ShouldHandle.set -> void
+static Polly.PartitionedCircuitBreakerResiliencePipelineBuilderExtensions.AddPartitionedCircuitBreaker(this Polly.ResiliencePipelineBuilder! builder, Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions! options) -> Polly.ResiliencePipelineBuilder!
+static Polly.PartitionedCircuitBreakerResiliencePipelineBuilderExtensions.AddPartitionedCircuitBreaker<TResult>(this Polly.ResiliencePipelineBuilder<TResult>! builder, Polly.Partitioning.PartitionedCircuitBreakerStrategyOptions<TResult>! options) -> Polly.ResiliencePipelineBuilder<TResult>!
+static Polly.PredicateBuilder<TResult>.implicit operator System.Func<Polly.Partitioning.PartitionedCircuitBreakerPredicateArguments<TResult>, System.Threading.Tasks.ValueTask<bool>>!(Polly.PredicateBuilder<TResult>! builder) -> System.Func<Polly.Partitioning.PartitionedCircuitBreakerPredicateArguments<TResult>, System.Threading.Tasks.ValueTask<bool>>!
