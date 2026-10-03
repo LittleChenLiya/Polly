@@ -13,5 +13,6 @@
   <Project Path="Intro.FSharp/Intro.FSharp.fsproj" />
   <Project Path="Intro.VisualBasic/Intro.VisualBasic.vbproj" />
   <Project Path="Intro/Intro.csproj" />
+  <Project Path="RequestExecution/RequestExecution.csproj" />
   <Project Path="Retries/Retries.csproj" />
 </Solution>

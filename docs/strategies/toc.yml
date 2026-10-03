@@ -4,6 +4,8 @@
   href: timeout.md
 - name: Retry
   href: retry.md
+- name: Request execution
+  href: request-execution.md
 - name: Rate limiter
   href: rate-limiter.md
 - name: Hedging

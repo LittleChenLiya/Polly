@@ -4,6 +4,10 @@
 
 <!-- next-release -->
 
+## Unreleased
+
+* Add request execution adapter (`AddRequestExecution`) that creates an explicit request copy for every attempt via `RequestExecutionStrategyOptions<TRequest, TResult>` and `RequestCopyOwnership`, so retries never reuse an already consumed request object
+
 ## 8.8.0
 
 * Add `EnableReloadsWithMonitor()` accepting custom `IOptionsMonitor` by [@arashzjahangiri](https://github.com/arashzjahangiri) in https://github.com/App-vNext/Polly/pull/3140

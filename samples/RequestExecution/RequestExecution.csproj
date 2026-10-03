@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- Small, single-target demo for the request execution adapter. -->
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- This standalone demo does not ship a public API. -->
+    <UsePublicApiAnalyzers>false</UsePublicApiAnalyzers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Reference the locally built Polly.Core that contains the adapter. -->
+    <ProjectReference Include="..\..\src\Polly.Core\Polly.Core.csproj" />
+  </ItemGroup>
+
+</Project>

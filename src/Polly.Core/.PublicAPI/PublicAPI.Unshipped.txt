@@ -1,1 +1,31 @@
 ﻿#nullable enable
+Polly.RequestExecution.RequestCopyOwnership
+Polly.RequestExecution.RequestCopyOwnership.Adapter = 0 -> Polly.RequestExecution.RequestCopyOwnership
+Polly.RequestExecution.RequestCopyOwnership.Callback = 1 -> Polly.RequestExecution.RequestCopyOwnership
+Polly.RequestExecution.RequestExecutionStrategyOptions<TRequest, TResult>
+Polly.RequestExecution.RequestExecutionStrategyOptions<TRequest, TResult>.CopyFactory.get -> System.Func<TRequest!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<TRequest!>>?
+Polly.RequestExecution.RequestExecutionStrategyOptions<TRequest, TResult>.CopyFactory.set -> void
+Polly.RequestExecution.RequestExecutionStrategyOptions<TRequest, TResult>.ExecuteCallback.get -> System.Func<TRequest!, Polly.ResilienceContext!, System.Threading.Tasks.ValueTask<Polly.Outcome<TResult>>>?
+Polly.RequestExecution.RequestExecutionStrategyOptions<TRequest, TResult>.ExecuteCallback.set -> void
+Polly.RequestExecution.RequestExecutionStrategyOptions<TRequest, TResult>.OriginalRequest.get -> TRequest?
+Polly.RequestExecution.RequestExecutionStrategyOptions<TRequest, TResult>.OriginalRequest.set -> void
+Polly.RequestExecution.RequestExecutionStrategyOptions<TRequest, TResult>.Ownership.get -> Polly.RequestExecution.RequestCopyOwnership
+Polly.RequestExecution.RequestExecutionStrategyOptions<TRequest, TResult>.Ownership.set -> void
+Polly.RequestExecution.RequestExecutionStrategyOptions<TRequest, TResult>.ReleaseCallback.get -> System.Func<TRequest!, System.Threading.Tasks.ValueTask>?
+Polly.RequestExecution.RequestExecutionStrategyOptions<TRequest, TResult>.ReleaseCallback.set -> void
+Polly.RequestExecution.RequestExecutionStrategyOptions<TRequest, TResult>.RequestExecutionStrategyOptions() -> void
+static Polly.RequestExecutionResiliencePipelineBuilderExtensions.AddRequestExecution<TRequest>(this Polly.ResiliencePipelineBuilder! builder, Polly.RequestExecution.VoidRequestExecutionStrategyOptions<TRequest!>! options) -> Polly.ResiliencePipelineBuilder!
+static Polly.RequestExecutionResiliencePipelineBuilderExtensions.AddRequestExecution<TRequest, TResult>(this Polly.ResiliencePipelineBuilder<TResult>! builder, Polly.RequestExecution.RequestExecutionStrategyOptions<TRequest!, TResult>! options) -> Polly.ResiliencePipelineBuilder<TResult>!
+Polly.RequestExecution.VoidRequestExecutionStrategyOptions<TRequest>
+Polly.RequestExecution.VoidRequestExecutionStrategyOptions<TRequest>.CopyFactory.get -> System.Func<TRequest!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<TRequest!>>?
+Polly.RequestExecution.VoidRequestExecutionStrategyOptions<TRequest>.CopyFactory.set -> void
+Polly.RequestExecution.VoidRequestExecutionStrategyOptions<TRequest>.ExecuteCallback.get -> System.Func<TRequest!, Polly.ResilienceContext!, System.Threading.Tasks.ValueTask>?
+Polly.RequestExecution.VoidRequestExecutionStrategyOptions<TRequest>.ExecuteCallback.set -> void
+Polly.RequestExecution.VoidRequestExecutionStrategyOptions<TRequest>.OriginalRequest.get -> TRequest?
+Polly.RequestExecution.VoidRequestExecutionStrategyOptions<TRequest>.OriginalRequest.set -> void
+Polly.RequestExecution.VoidRequestExecutionStrategyOptions<TRequest>.Ownership.get -> Polly.RequestExecution.RequestCopyOwnership
+Polly.RequestExecution.VoidRequestExecutionStrategyOptions<TRequest>.Ownership.set -> void
+Polly.RequestExecution.VoidRequestExecutionStrategyOptions<TRequest>.ReleaseCallback.get -> System.Func<TRequest!, System.Threading.Tasks.ValueTask>?
+Polly.RequestExecution.VoidRequestExecutionStrategyOptions<TRequest>.ReleaseCallback.set -> void
+Polly.RequestExecution.VoidRequestExecutionStrategyOptions<TRequest>.VoidRequestExecutionStrategyOptions() -> void
+Polly.RequestExecutionResiliencePipelineBuilderExtensions
