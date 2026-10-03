@@ -1,1 +1,39 @@
 ﻿#nullable enable
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerBrokenException
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerBrokenException.Key.get -> string?
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerBrokenException.KeyedCircuitBreakerBrokenException() -> void
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerBrokenException.KeyedCircuitBreakerBrokenException(string! message) -> void
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerBrokenException.KeyedCircuitBreakerBrokenException(string! message, System.Exception! inner) -> void
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerBrokenException.RetryAfter.get -> System.TimeSpan?
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerCapacityExceededException
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerCapacityExceededException.Key.get -> string?
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerCapacityExceededException.KeyedCircuitBreakerCapacityExceededException() -> void
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerCapacityExceededException.KeyedCircuitBreakerCapacityExceededException(string! message) -> void
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerCapacityExceededException.KeyedCircuitBreakerCapacityExceededException(string! message, System.Exception! inner) -> void
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerCapacityExceededException.MaxGroups.get -> int?
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerKeyArguments
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerKeyArguments.Context.get -> Polly.ResilienceContext!
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerKeyArguments.KeyedCircuitBreakerKeyArguments() -> void
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerKeyArguments.KeyedCircuitBreakerKeyArguments(Polly.ResilienceContext! context) -> void
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerPredicateArguments<TResult>
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerPredicateArguments<TResult>.Context.get -> Polly.ResilienceContext!
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerPredicateArguments<TResult>.KeyedCircuitBreakerPredicateArguments() -> void
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerPredicateArguments<TResult>.KeyedCircuitBreakerPredicateArguments(Polly.ResilienceContext! context, Polly.Outcome<TResult> outcome) -> void
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerPredicateArguments<TResult>.Outcome.get -> Polly.Outcome<TResult>
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerStrategyOptions
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerStrategyOptions.KeyedCircuitBreakerStrategyOptions() -> void
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerStrategyOptions<TResult>
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerStrategyOptions<TResult>.BreakDuration.get -> System.TimeSpan
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerStrategyOptions<TResult>.BreakDuration.set -> void
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerStrategyOptions<TResult>.FailureThreshold.get -> int
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerStrategyOptions<TResult>.FailureThreshold.set -> void
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerStrategyOptions<TResult>.KeyFactory.get -> System.Func<Polly.KeyedCircuitBreaker.KeyedCircuitBreakerKeyArguments, System.Threading.Tasks.ValueTask<string!>>?
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerStrategyOptions<TResult>.KeyFactory.set -> void
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerStrategyOptions<TResult>.KeyedCircuitBreakerStrategyOptions() -> void
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerStrategyOptions<TResult>.MaxGroups.get -> int
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerStrategyOptions<TResult>.MaxGroups.set -> void
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerStrategyOptions<TResult>.ShouldHandle.get -> System.Func<Polly.KeyedCircuitBreaker.KeyedCircuitBreakerPredicateArguments<TResult>, System.Threading.Tasks.ValueTask<bool>>!
+Polly.KeyedCircuitBreaker.KeyedCircuitBreakerStrategyOptions<TResult>.ShouldHandle.set -> void
+Polly.KeyedCircuitBreakerResiliencePipelineBuilderExtensions
+static Polly.KeyedCircuitBreakerResiliencePipelineBuilderExtensions.AddKeyedCircuitBreaker(this Polly.ResiliencePipelineBuilder! builder, Polly.KeyedCircuitBreaker.KeyedCircuitBreakerStrategyOptions! options) -> Polly.ResiliencePipelineBuilder!
+static Polly.KeyedCircuitBreakerResiliencePipelineBuilderExtensions.AddKeyedCircuitBreaker<TResult>(this Polly.ResiliencePipelineBuilder<TResult>! builder, Polly.KeyedCircuitBreaker.KeyedCircuitBreakerStrategyOptions<TResult>! options) -> Polly.ResiliencePipelineBuilder<TResult>!
