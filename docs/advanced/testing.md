@@ -62,6 +62,58 @@ ResiliencePipelineDescriptor descriptor = pipeline.GetPipelineDescriptor();
 ```
 <!-- endSnippet -->
 
+## Collecting telemetry events
+
+Use the [`TelemetryEventCollector`](xref:Polly.Testing.TelemetryEventCollector) to capture the telemetry events of a single pipeline invocation and take them out of the pipeline for analysis. The collector is a `TelemetryListener` that composes with your existing telemetry instead of replacing it: pass the listener you already use to the constructor and it keeps receiving every event.
+
+Each invocation collects its own isolated set of events, even when invocations run concurrently. When the invocation is disposed, the collected events are sealed into an immutable snapshot that preserves the event names, their order, the attempt numbers and the outcome categories. Only explicitly supported scalar values are copied into the snapshot; any other object is represented by its type name, so the collector never calls `ToString` on your objects and never stores mutable originals. If the number of events exceeds the configured limit, the extra events are only counted as dropped and are not stored. The collector never throws, so it cannot change the outcome of the pipeline under test.
+
+<!-- snippet: telemetry-event-collector -->
+```cs
+// Create the collector. If you already use a telemetry listener, pass it
+// to the constructor so it keeps receiving every event.
+var collector = new TelemetryEventCollector();
+
+ResiliencePipeline<string> pipeline = new ResiliencePipelineBuilder<string> { TelemetryListener = collector }
+    .AddRetry(new RetryStrategyOptions<string>
+    {
+        MaxRetryAttempts = 2,
+        Delay = TimeSpan.Zero,
+    })
+    .Build();
+
+// Collect the telemetry of a single invocation.
+using (collector.BeginInvocation())
+{
+    pipeline.Execute(static _ => "result");
+}
+
+// Disposing the invocation seals the collected events into an immutable snapshot.
+TelemetryInvocationSnapshot snapshot = collector.GetSnapshots().Single();
+
+// Print a report of the collected events.
+Console.WriteLine("Collected {0} events ({1} dropped):", snapshot.Events.Count, snapshot.DroppedEvents);
+foreach (CollectedTelemetryEvent e in snapshot.Events)
+{
+    Console.WriteLine(
+        "#{0} {1}: attempt={2}, outcome={3}",
+        e.Sequence,
+        e.EventName,
+        e.Attempt is int attempt ? attempt : "-",
+        e.Outcome);
+}
+```
+<!-- endSnippet -->
+
+The example above prints a report similar to:
+
+```text
+Collected 3 events (0 dropped):
+#0 PipelineExecuting: attempt=-, outcome=None
+#1 ExecutionAttempt: attempt=0, outcome=Result
+#2 PipelineExecuted: attempt=-, outcome=Result
+```
+
 ## Mocking `ResiliencePipelineProvider<TKey>`
 
 Consider the following code that might resemble a part of your project:

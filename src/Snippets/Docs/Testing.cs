@@ -62,6 +62,46 @@ internal static class Testing
         #endregion
     }
 
+    public static void TelemetryEventCollectorReport()
+    {
+        #region telemetry-event-collector
+
+        // Create the collector. If you already use a telemetry listener, pass it
+        // to the constructor so it keeps receiving every event.
+        var collector = new TelemetryEventCollector();
+
+        ResiliencePipeline<string> pipeline = new ResiliencePipelineBuilder<string> { TelemetryListener = collector }
+            .AddRetry(new RetryStrategyOptions<string>
+            {
+                MaxRetryAttempts = 2,
+                Delay = TimeSpan.Zero,
+            })
+            .Build();
+
+        // Collect the telemetry of a single invocation.
+        using (collector.BeginInvocation())
+        {
+            pipeline.Execute(static _ => "result");
+        }
+
+        // Disposing the invocation seals the collected events into an immutable snapshot.
+        TelemetryInvocationSnapshot snapshot = collector.GetSnapshots().Single();
+
+        // Print a report of the collected events.
+        Console.WriteLine("Collected {0} events ({1} dropped):", snapshot.Events.Count, snapshot.DroppedEvents);
+        foreach (CollectedTelemetryEvent e in snapshot.Events)
+        {
+            Console.WriteLine(
+                "#{0} {1}: attempt={2}, outcome={3}",
+                e.Sequence,
+                e.EventName,
+                e.Attempt is int attempt ? attempt : "-",
+                e.Outcome);
+        }
+
+        #endregion
+    }
+
     public static void PipelineProviderProviderMocking()
     {
         #region testing-resilience-pipeline-provider-mocking

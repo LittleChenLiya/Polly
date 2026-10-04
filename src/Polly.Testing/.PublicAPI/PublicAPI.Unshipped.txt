@@ -1,1 +1,44 @@
 ﻿#nullable enable
+Polly.Testing.CapturedValue
+Polly.Testing.CapturedValue.CapturedValue() -> void
+Polly.Testing.CapturedValue.Kind.get -> Polly.Testing.CapturedValueKind
+static Polly.Testing.CapturedValue.Null.get -> Polly.Testing.CapturedValue
+Polly.Testing.CapturedValue.TypeName.get -> string?
+Polly.Testing.CapturedValue.Value.get -> object?
+Polly.Testing.CapturedValueKind
+Polly.Testing.CapturedValueKind.Null = 0 -> Polly.Testing.CapturedValueKind
+Polly.Testing.CapturedValueKind.Scalar = 1 -> Polly.Testing.CapturedValueKind
+Polly.Testing.CapturedValueKind.TypeMarker = 2 -> Polly.Testing.CapturedValueKind
+Polly.Testing.CollectedTelemetryEvent
+Polly.Testing.CollectedTelemetryEvent.Arguments.get -> System.Collections.Generic.IReadOnlyDictionary<string!, Polly.Testing.CapturedValue>!
+Polly.Testing.CollectedTelemetryEvent.Attempt.get -> int?
+Polly.Testing.CollectedTelemetryEvent.EventName.get -> string!
+Polly.Testing.CollectedTelemetryEvent.ExceptionType.get -> string?
+Polly.Testing.CollectedTelemetryEvent.Outcome.get -> Polly.Testing.TelemetryOutcomeCategory
+Polly.Testing.CollectedTelemetryEvent.PipelineInstanceName.get -> string?
+Polly.Testing.CollectedTelemetryEvent.PipelineName.get -> string?
+Polly.Testing.CollectedTelemetryEvent.Result.get -> Polly.Testing.CapturedValue
+Polly.Testing.CollectedTelemetryEvent.Sequence.get -> long
+Polly.Testing.CollectedTelemetryEvent.Severity.get -> Polly.Telemetry.ResilienceEventSeverity
+Polly.Testing.CollectedTelemetryEvent.StrategyName.get -> string?
+Polly.Testing.TelemetryEventCollector
+Polly.Testing.TelemetryEventCollector.BeginInvocation() -> Polly.Testing.TelemetryInvocation!
+const Polly.Testing.TelemetryEventCollector.DefaultMaxEventsPerInvocation = 1024 -> int
+Polly.Testing.TelemetryEventCollector.GetSnapshots() -> System.Collections.Generic.IReadOnlyList<Polly.Testing.TelemetryInvocationSnapshot!>!
+Polly.Testing.TelemetryEventCollector.MaxEventsPerInvocation.get -> int
+Polly.Testing.TelemetryEventCollector.TelemetryEventCollector(Polly.Telemetry.TelemetryListener? innerListener = null, int maxEventsPerInvocation = 1024) -> void
+Polly.Testing.TelemetryInvocation
+Polly.Testing.TelemetryInvocation.Dispose() -> void
+Polly.Testing.TelemetryInvocation.DroppedEvents.get -> long
+Polly.Testing.TelemetryInvocation.IsSealed.get -> bool
+Polly.Testing.TelemetryInvocation.Snapshot.get -> Polly.Testing.TelemetryInvocationSnapshot!
+Polly.Testing.TelemetryInvocationSnapshot
+Polly.Testing.TelemetryInvocationSnapshot.DroppedEvents.get -> long
+Polly.Testing.TelemetryInvocationSnapshot.Events.get -> System.Collections.Generic.IReadOnlyList<Polly.Testing.CollectedTelemetryEvent!>!
+Polly.Testing.TelemetryOutcomeCategory
+Polly.Testing.TelemetryOutcomeCategory.Exception = 2 -> Polly.Testing.TelemetryOutcomeCategory
+Polly.Testing.TelemetryOutcomeCategory.None = 0 -> Polly.Testing.TelemetryOutcomeCategory
+Polly.Testing.TelemetryOutcomeCategory.Result = 1 -> Polly.Testing.TelemetryOutcomeCategory
+override Polly.Testing.CapturedValue.ToString() -> string!
+override Polly.Testing.TelemetryEventCollector.Write<TResult, TArgs>(in Polly.Telemetry.TelemetryEventArguments<TResult, TArgs> args) -> void
+static Polly.Testing.CapturedValue.Capture(object? value) -> Polly.Testing.CapturedValue

@@ -4,6 +4,10 @@
 
 <!-- next-release -->
 
+## Unreleased
+
+* Add `TelemetryEventCollector` to `Polly.Testing` for collecting the telemetry events of individual pipeline invocations in tests
+
 ## 8.8.0
 
 * Add `EnableReloadsWithMonitor()` accepting custom `IOptionsMonitor` by [@arashzjahangiri](https://github.com/arashzjahangiri) in https://github.com/App-vNext/Polly/pull/3140
