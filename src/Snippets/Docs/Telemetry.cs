@@ -163,4 +163,42 @@ internal static class Telemetry
 
         #endregion
     }
+
+    public static void EventCollectorExample()
+    {
+        #region event-collector
+
+        // Create an event collector with a limit of 1024 events per call.
+        var collector = new EventCollector(maxEventsPerCall: 1024);
+
+        // Register the collector alongside other telemetry listeners.
+        var telemetryOptions = new TelemetryOptions();
+        telemetryOptions.TelemetryListeners.Add(collector);
+
+        var pipeline = new ResiliencePipelineBuilder()
+            .AddRetry(new RetryStrategyOptions
+            {
+                MaxRetryAttempts = 2,
+                Delay = TimeSpan.FromMilliseconds(1)
+            })
+            .ConfigureTelemetry(telemetryOptions)
+            .Build();
+
+        // Execute the pipeline.
+        pipeline.Execute(() =>
+        {
+            // Your code comes here.
+        });
+
+        // Retrieve the snapshot for the last call.
+        var snapshot = collector.GetLastSnapshot();
+
+        // Print a report of the collected events.
+        foreach (var record in snapshot!.Events)
+        {
+            Console.WriteLine($"{record.Sequence}: {record.EventName} ({record.ResultCategory})");
+        }
+
+        #endregion
+    }
 }

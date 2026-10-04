@@ -299,3 +299,48 @@ In general the suggestion is to use `SeverityProvider` to override strategy spec
 
 > [!TIP]
 > If you want to suppress the specific event completely then use `ResilienceEventSeverity.None`.
+
+## Collecting events for analysis
+
+When testing or debugging a resilience pipeline, you might want to capture the telemetry events produced by a single call and analyze them. The `EventCollector` is an explicit telemetry listener that collects events into per-call snapshots. It does not replace any existing telemetry callback; it is an additional listener that you register alongside others.
+
+The collector groups events by call. A new snapshot is started when a `PipelineExecuting` event is received and sealed when the corresponding `PipelineExecuted` event is received. Each snapshot preserves the event names, order, attempt numbers, and result categories. Only explicitly supported scalar fields are copied from the event arguments; unknown objects are marked by their type name and are never stored or converted to strings.
+
+If the number of events for a call exceeds the configured limit, additional events are dropped and the `DroppedCount` is incremented. Errors raised by the collector are swallowed so they cannot affect the business result.
+
+<!-- snippet: event-collector -->
+```cs
+// Create an event collector with a limit of 1024 events per call.
+var collector = new EventCollector(maxEventsPerCall: 1024);
+
+// Register the collector alongside other telemetry listeners.
+var telemetryOptions = new TelemetryOptions();
+telemetryOptions.TelemetryListeners.Add(collector);
+
+var pipeline = new ResiliencePipelineBuilder()
+    .AddRetry(new RetryStrategyOptions
+    {
+        MaxRetryAttempts = 2,
+        Delay = TimeSpan.FromMilliseconds(1)
+    })
+    .ConfigureTelemetry(telemetryOptions)
+    .Build();
+
+// Execute the pipeline.
+pipeline.Execute(() =>
+{
+    // Your code comes here.
+});
+
+// Retrieve the snapshot for the last call.
+var snapshot = collector.GetLastSnapshot();
+
+// Print a report of the collected events.
+foreach (var record in snapshot!.Events)
+{
+    Console.WriteLine($"{record.Sequence}: {record.EventName} ({record.ResultCategory})");
+}
+```
+<!-- endSnippet -->
+
+The `EventCollector` is thread-safe and supports concurrent calls. Each call gets its own isolated snapshot. After the call completes, the snapshot is sealed and can be safely analyzed.

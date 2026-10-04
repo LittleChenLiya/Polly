@@ -1,1 +1,38 @@
-﻿#nullable enable
+#nullable enable
+Polly.Telemetry.EventCollector
+Polly.Telemetry.EventCollector.CallCount.get -> int
+Polly.Telemetry.EventCollector.EventCollector(int maxEventsPerCall = 1024) -> void
+Polly.Telemetry.EventCollector.GetLastSnapshot() -> Polly.Telemetry.EventSnapshot?
+Polly.Telemetry.EventCollector.GetSnapshot(int callIndex) -> Polly.Telemetry.EventSnapshot?
+Polly.Telemetry.EventCollector.GetSnapshots() -> System.Collections.Generic.IReadOnlyList<Polly.Telemetry.EventSnapshot!>!
+Polly.Telemetry.EventCollector.MaxEventsPerCall.get -> int
+Polly.Telemetry.EventCollector.Seal() -> void
+Polly.Telemetry.EventRecord
+Polly.Telemetry.EventRecord.AttemptNumber.get -> int?
+Polly.Telemetry.EventRecord.Duration.get -> System.TimeSpan?
+Polly.Telemetry.EventRecord.EventName.get -> string!
+Polly.Telemetry.EventRecord.ExceptionType.get -> string?
+Polly.Telemetry.EventRecord.Fields.get -> System.Collections.Generic.IReadOnlyDictionary<string!, object?>!
+Polly.Telemetry.EventRecord.Handled.get -> bool?
+Polly.Telemetry.EventRecord.OperationKey.get -> string?
+Polly.Telemetry.EventRecord.PipelineInstanceName.get -> string?
+Polly.Telemetry.EventRecord.PipelineName.get -> string?
+Polly.Telemetry.EventRecord.ResultCategory.get -> Polly.Telemetry.ResultCategory
+Polly.Telemetry.EventRecord.RetryDelay.get -> System.TimeSpan?
+Polly.Telemetry.EventRecord.Sequence.get -> int
+Polly.Telemetry.EventRecord.Severity.get -> Polly.Telemetry.ResilienceEventSeverity
+Polly.Telemetry.EventRecord.StrategyName.get -> string?
+Polly.Telemetry.EventRecord.UnknownFieldTypes.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+Polly.Telemetry.EventSnapshot
+Polly.Telemetry.EventSnapshot.CallIndex.get -> int
+Polly.Telemetry.EventSnapshot.CollectedCount.get -> int
+Polly.Telemetry.EventSnapshot.DroppedCount.get -> int
+Polly.Telemetry.EventSnapshot.Events.get -> System.Collections.Generic.IReadOnlyList<Polly.Telemetry.EventRecord!>!
+Polly.Telemetry.EventSnapshot.IsSealed.get -> bool
+Polly.Telemetry.EventSnapshot.TotalCount.get -> int
+Polly.Telemetry.ResultCategory
+Polly.Telemetry.ResultCategory.Exception = 2 -> Polly.Telemetry.ResultCategory
+Polly.Telemetry.ResultCategory.Success = 1 -> Polly.Telemetry.ResultCategory
+Polly.Telemetry.ResultCategory.Unknown = 0 -> Polly.Telemetry.ResultCategory
+Polly.Telemetry.EventCollector.Dispose() -> void
+override Polly.Telemetry.EventCollector.Write<TResult, TArgs>(in Polly.Telemetry.TelemetryEventArguments<TResult, TArgs> args) -> void
