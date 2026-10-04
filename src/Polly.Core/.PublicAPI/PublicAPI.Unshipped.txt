@@ -1,1 +1,3 @@
 ﻿#nullable enable
+Polly.Fallback.OrderedFallback
+static Polly.Fallback.OrderedFallback.ExecuteAsync<TResult>(Polly.ResilienceContext! context, System.Collections.Generic.IEnumerable<System.Func<Polly.ResilienceContext!, System.Threading.Tasks.ValueTask<TResult>>!>! candidates, System.Func<System.Exception!, bool>! isFallbackable) -> System.Threading.Tasks.ValueTask<TResult>

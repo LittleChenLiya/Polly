@@ -4,6 +4,8 @@
   href: dependency-injection.md
 - name: Resilience context
   href: resilience-context.md
+- name: Ordered fallback execution
+  href: ordered-fallback.md
 - name: Performance
   href: performance.md
 - name: Testing

@@ -4,6 +4,8 @@
 
 <!-- next-release -->
 
+* Add `Polly.Fallback.OrderedFallback`: an independent, ordered fallback execution entry point that tries a fixed snapshot of fallback candidates one at a time, honors `ResilienceContext` cancellation, stops immediately on non-fallbackable errors, and preserves all errors in invocation order when every candidate fails
+
 ## 8.8.0
 
 * Add `EnableReloadsWithMonitor()` accepting custom `IOptionsMonitor` by [@arashzjahangiri](https://github.com/arashzjahangiri) in https://github.com/App-vNext/Polly/pull/3140
